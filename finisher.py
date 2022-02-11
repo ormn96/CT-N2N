@@ -3,8 +3,11 @@ from zipfile import ZipFile
 import os
 
 
-def finish(output_path, output_zip_path):
+def finish(output_path, output_zip_path, download_in_colab=False):
     create_output_zip(output_path, output_zip_path)
+    if download_in_colab:
+        from google.colab import files
+        files.download(output_zip_path)
 
 
 def create_output_zip(output_path, output_zip_path):
