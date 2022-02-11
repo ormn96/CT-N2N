@@ -152,9 +152,9 @@ def __parseMD5(webFetch=True):
         return dict(md5_pairs)
 
 
-def unzip_dataset(output_dir="dataset", delete_after_done=True):
+def unzip_dataset(start_index=0, end_index=len(links), output_dir="dataset", delete_after_done=True):
     print("unzipping dataset")
-    for idx, prog in prog_iter(range(len(links))):
+    for idx, prog in prog_iter(list(range(len(links)))[start_index:end_index]):
         fn = 'Images_png_%02d.zip' % (idx + 1)
         if os.path.exists(fn):
             print(f"{prog} - unzipping {fn}...")
@@ -187,7 +187,7 @@ def flatten_dataset(input_dir, output_dir):
 
 def create_dataset(start_index=0, end_index=len(links), output_dir="dataset"):
     download(start_index=start_index, end_index=end_index)
-    unzip_dataset("tmp")
+    unzip_dataset(start_index=start_index, end_index=end_index, output_dir="tmp")
     flatten_dataset("tmp", output_dir)
 
 
