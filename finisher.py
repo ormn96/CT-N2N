@@ -17,7 +17,7 @@ def create_output_zip(output_path, output_zip_path):
         for folderName, subfolders, filenames in os.walk(output_path):
             for filename in tqdm(desc=f"Packing({folderName})", iterable=filenames, unit="Files"):
                 # create complete filepath of file in directory
-                filePath = os.path.join(folderName, filename)
+                file_path = os.path.join(folderName, filename)
                 # Add file to zip
-                zipObj.write(filePath, filePath)
+                zipObj.write(file_path, file_path)
     print("finish creating archive")
