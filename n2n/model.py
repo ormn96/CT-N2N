@@ -1,7 +1,7 @@
 from keras.models import Model
 from keras.layers import Input, Add, PReLU, Conv2DTranspose, Concatenate, MaxPooling2D, UpSampling2D, Dropout
 from keras.layers.convolutional import Conv2D
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 from keras.callbacks import Callback
 from keras import backend as K
 import tensorflow as tf
