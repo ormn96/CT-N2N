@@ -84,7 +84,7 @@ def get_srresnet_model(input_channel_num=3, feature_dim=64, resunit_num=16):
 
 
 # UNet: code from https://github.com/pietz/unet-keras
-def get_unet_model(input_channel_num=3, out_ch=3, start_ch=64, depth=4, inc_rate=2., activation='relu',
+def get_unet_model(input_channel_num=1, out_ch=1, start_ch=64, depth=4, inc_rate=2., activation='relu',
          dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False):
     def _conv_block(m, dim, acti, bn, res, do=0):
         n = Conv2D(dim, 3, activation=acti, padding='same')(m)

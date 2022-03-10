@@ -52,17 +52,18 @@ def addNoise(img, db, noise_gen):
 def augment_train(image):
     noise_db = 10.0
     noisy_1 = addNoise(image, noise_db, wgn)
-    noisy_1.set_shape([512, 512])
+    noisy_1.set_shape([512, 512,1])
     noisy_2 = addNoise(image, noise_db, wgn)
-    noisy_2.set_shape([512, 512])
+    noisy_2.set_shape([512, 512,1])
     return noisy_1, noisy_2
 
 
 def augment_val(image):
     noise_db = 10.0
     clean = image
+    clean.set_shape([512, 512, 1])
     noisy = addNoise(image, noise_db, wgn)
-    noisy.set_shape([512, 512])
+    noisy.set_shape([512, 512,1])
     return noisy, clean
 
 
