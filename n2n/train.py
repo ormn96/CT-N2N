@@ -6,6 +6,7 @@ from tensorflow.keras.optimizers import Adam
 from model import get_model, PSNR, L0Loss, UpdateAnnealingParameter
 from generator import NoisyImageGenerator, ValGenerator
 from noise_model import get_noise_model
+import dataset
 
 
 class Schedule:
@@ -38,7 +39,7 @@ def get_args(input_args):
                         help="number of epochs")
     parser.add_argument("--lr", type=float, default=0.01,
                         help="learning rate")
-    parser.add_argument("--steps", type=int, default=1000,
+    parser.add_argument("--steps", type=int, default=None,
                         help="steps per epoch")
     parser.add_argument("--loss", type=str, default="mse",
                         help="loss; mse', 'mae', or 'l0' is expected")
@@ -84,12 +85,18 @@ def main(*input_args):
         loss_type = l0()
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
+    #
     source_noise_model = get_noise_model(args.source_noise_model)
     target_noise_model = get_noise_model(args.target_noise_model)
     val_noise_model = get_noise_model(args.val_noise_model)
     generator = NoisyImageGenerator(image_dir, source_noise_model, target_noise_model, batch_size=batch_size,
                                     image_size=image_size)
     val_generator = ValGenerator(test_dir, val_noise_model)
+    #
+    ##
+    train_ds = dataset.create_train_dataset(image_dir,batch_size=batch_size)
+    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size)
+    ##
     output_path.mkdir(parents=True, exist_ok=True)
     callbacks.append(LearningRateScheduler(schedule=Schedule(nb_epochs, lr)))
     callbacks.append(ModelCheckpoint(str(output_path) + "/weights.{epoch:03d}-{val_loss:.3f}-{val_PSNR:.5f}.hdf5",
@@ -97,12 +104,20 @@ def main(*input_args):
                                      verbose=1,
                                      mode="max",
                                      save_best_only=True))
-    hist = model.fit_generator(generator=generator,
-                               steps_per_epoch=steps,
-                               epochs=nb_epochs,
-                               validation_data=val_generator,
-                               verbose=1,
-                               callbacks=callbacks)
+    hist = model.fit(
+        x=train_ds,
+        epochs=nb_epochs,
+        verbose=1,
+        callbacks=callbacks,
+        validation_data=val_ds,
+        steps_per_epoch=steps,
+    )
+    # hist = model.fit_generator(generator=generator,
+    #                            steps_per_epoch=steps,
+    #                            epochs=nb_epochs,
+    #                            validation_data=val_generator,
+    #                            verbose=1,
+    #                            callbacks=callbacks)
 
     np.savez(str(output_path.joinpath("history.npz")), history=hist.history)
 

@@ -49,17 +49,24 @@ def addNoise(img, db, noise_gen):
     return tf.squeeze(noisy_img)
 
 
-def augment(image):
+def augment_train(image):
     noise_db = 10.0
-    clean = image
     noisy_1 = addNoise(image, noise_db, wgn)
     noisy_1.set_shape([512, 512])
     noisy_2 = addNoise(image, noise_db, wgn)
     noisy_2.set_shape([512, 512])
-    return ((noisy_1, noisy_2), clean)
+    return noisy_1, noisy_2
 
 
-def create_train_dataset(dataset_path, minibatch_size):
+def augment_val(image):
+    noise_db = 10.0
+    clean = image
+    noisy = addNoise(image, noise_db, wgn)
+    noisy.set_shape([512, 512])
+    return noisy, clean
+
+
+def create_train_dataset(dataset_path, batch_size):
     print('Setting up training dataset source from', dataset_path)
     num_threads = 2
     buf_size = 100
@@ -70,16 +77,16 @@ def create_train_dataset(dataset_path, minibatch_size):
 
     duplicated_ds = image_ds.flat_map(dup_ds)
 
-    augmented_ds = duplicated_ds.map(augment,num_parallel_calls=num_threads)
+    augmented_ds = duplicated_ds.map(augment_train,num_parallel_calls=num_threads)
 
     shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
 
-    batched_ds = shuffled_ds.batch(minibatch_size)
+    batched_ds = shuffled_ds.batch(batch_size)
 
     return batched_ds
 
 
-def create_val_dataset(dataset_path, minibatch_size):
+def create_val_dataset(dataset_path, batch_size):
     print('Setting up validation dataset source from', dataset_path)
     num_threads = 2
     buf_size = 100
@@ -88,10 +95,11 @@ def create_val_dataset(dataset_path, minibatch_size):
 
     image_ds = list_ds.map(read_image,num_parallel_calls=num_threads)
 
-    augmented_ds = image_ds.map(augment,num_parallel_calls=num_threads)
+    augmented_ds = image_ds.map(augment_val,num_parallel_calls=num_threads)
 
     shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
 
-    batched_ds = shuffled_ds.batch(minibatch_size)
+    batched_ds = shuffled_ds.batch(batch_size)
 
     return batched_ds
+
