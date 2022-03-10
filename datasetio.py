@@ -210,12 +210,14 @@ def split_dataset(input_dir, train_dir, val_dir, train_ratio):
         out_file_path = os.path.join(val_dir, file_name)
         shutil.move(in_file_path, out_file_path)
     print(f"done moving {len(l2)} files to \"{val_dir}\"")
+    shutil.rmtree(input_dir, ignore_errors=True)
 
 
 def create_dataset(start_index=0, end_index=len(links), train_dir="dataset",val_dir="val",train_ratio=0.7):
     download(start_index=start_index, end_index=end_index)
     unzip_dataset(start_index=start_index, end_index=end_index, output_dir="tmp")
-    os.mkdir("tmp2")
+    if not os.path.exists("tmp2"):
+        os.mkdir("tmp2")
     flatten_dataset("tmp", "tmp2")
     split_dataset(input_dir="tmp2",train_dir=train_dir,val_dir=val_dir,train_ratio=train_ratio)
 

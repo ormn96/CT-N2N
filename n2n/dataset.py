@@ -59,10 +59,10 @@ def augment(image):
     return ((noisy_1, noisy_2), clean)
 
 
-def create_dataset(dataset_path, minibatch_size, add_noise):
-    print('Setting up dataset source from', dataset_path)
+def create_train_dataset(dataset_path, minibatch_size):
+    print('Setting up training dataset source from', dataset_path)
     num_threads = 2
-    buf_size = 1000
+    buf_size = 100
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
 
@@ -78,3 +78,20 @@ def create_dataset(dataset_path, minibatch_size, add_noise):
 
     return batched_ds
 
+
+def create_val_dataset(dataset_path, minibatch_size):
+    print('Setting up validation dataset source from', dataset_path)
+    num_threads = 2
+    buf_size = 100
+
+    list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
+
+    image_ds = list_ds.map(read_image,num_parallel_calls=num_threads)
+
+    augmented_ds = image_ds.map(augment,num_parallel_calls=num_threads)
+
+    shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
+
+    batched_ds = shuffled_ds.batch(minibatch_size)
+
+    return batched_ds
