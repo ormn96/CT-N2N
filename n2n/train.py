@@ -43,6 +43,8 @@ def get_args(input_args):
                         help="learning rate")
     parser.add_argument("--steps", type=int, default=None,
                         help="steps per epoch")
+    parser.add_argument("--val_steps", type=int, default=None,
+                        help="steps per validation epoch")
     parser.add_argument("--loss", type=str, default="mse",
                         help="loss; mse', 'mae', or 'huber' is expected")
     parser.add_argument("--huber_loss_delta", type=float, default=1.5,
@@ -65,6 +67,7 @@ def main(*input_args):
     nb_epochs = args.nb_epochs
     lr = args.lr
     steps = args.steps
+    val_steps = args.val_steps
     loss_type = args.loss
     output_path = args.output_path
     net_depth = args.network_depth
@@ -98,6 +101,7 @@ def main(*input_args):
         callbacks=callbacks,
         validation_data=val_ds,
         steps_per_epoch=steps,
+        validation_steps=val_steps
     )
 
     np.savez(str(output_path.joinpath("history.npz")), history=hist.history)
