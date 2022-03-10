@@ -187,6 +187,10 @@ def flatten_dataset(input_dir, output_dir):
 
 
 def split_dataset(input_dir, train_dir, val_dir, train_ratio):
+    if not os.path.exists(train_dir):
+        os.mkdir(train_dir)
+    if not os.path.exists(val_dir):
+        os.mkdir(val_dir)
     f = []
     for (dirpath, dirnames, filenames) in os.walk(input_dir):
         f.extend(filenames)
