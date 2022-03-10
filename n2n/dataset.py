@@ -27,29 +27,24 @@ def dup_ds(image):
     return tf.data.Dataset.from_tensors(image).repeat(2)
 
 
-def wgn(x, snr):
-    x = tf.cast(x, tf.float32)
-    snr = 10 ** (snr / 10.0)
-    xpower = np.mean(x ** 2)
-    npower = xpower / snr
-    return np.random.randn(*x.shape.as_list()) * np.sqrt(npower)
-
+def wgn(shape, snr):
+    return np.random.normal(0.0,snr,shape.as_list())
 
 def addNoise(img, db, noise_gen):
-    w = noise_gen(img, db).astype(np.int16)
+    w = noise_gen(img.shape,db).astype(np.int16)
     noisy_img = img + w
     return noisy_img
 
 
 def augment_train(image):
-    noise_db = 10.0
+    noise_db = 0.015
     noisy_1 = addNoise(image, noise_db, wgn)
     noisy_2 = addNoise(image, noise_db, wgn)
     return noisy_1, noisy_2
 
 
 def augment_val(image):
-    noise_db = 10.0
+    noise_db = 0.015
     clean = image
     noisy = addNoise(image, noise_db, wgn)
     return noisy, clean
