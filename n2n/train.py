@@ -5,7 +5,6 @@ from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from model import get_unet_model, PSNR
 from tensorflow.keras.losses import Huber
-from noise_model import get_noise_model
 import dataset
 
 
@@ -69,7 +68,7 @@ def main(*input_args):
     steps = args.steps
     val_steps = args.val_steps
     loss_type = args.loss
-    output_path = args.output_path
+    output_path = Path(args.output_path)
     net_depth = args.network_depth
     model = get_unet_model(depth=net_depth)
 
