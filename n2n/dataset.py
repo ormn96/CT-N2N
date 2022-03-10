@@ -53,28 +53,10 @@ def augment(image):
     noise_db = 10.0
     clean = image
     noisy_1 = addNoise(image, noise_db, wgn)
+    noisy_1.set_shape([512, 512])
     noisy_2 = addNoise(image, noise_db, wgn)
+    noisy_2.set_shape([512, 512])
     return ((noisy_1, noisy_2), clean)
-
-
-def get_dataset_partitions_tf(ds, ds_size, train_split=0.8, val_split=0.1, test_split=0.1, shuffle=True,
-                              shuffle_size=1000):
-    assert (train_split + test_split + val_split) == 1
-
-    if shuffle:
-        # Specify seed to always have the same split distribution between runs
-        ds = ds.shuffle(shuffle_size, seed=12)
-
-    train_size = int(train_split * ds_size)
-    val_size = int(val_split * ds_size)
-
-    train_ds = ds.take(train_size)
-    val_ds = ds.skip(train_size).take(val_size)
-    test_ds = ds.skip(train_size).skip(val_size)
-
-    return train_ds, val_ds, test_ds
-
-
 
 
 def create_dataset(dataset_path, minibatch_size, add_noise):
@@ -89,9 +71,6 @@ def create_dataset(dataset_path, minibatch_size, add_noise):
     duplicated_ds = image_ds.flat_map(dup_ds)
 
     augmented_ds = duplicated_ds.map(augment,num_parallel_calls=num_threads)
-
-    # to delete
-    augmented_ds = augmented_ds.repeat()
 
     shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
 

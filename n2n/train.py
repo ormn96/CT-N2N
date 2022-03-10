@@ -97,7 +97,6 @@ def main(*input_args):
                                      verbose=1,
                                      mode="max",
                                      save_best_only=True))
-
     hist = model.fit_generator(generator=generator,
                                steps_per_epoch=steps,
                                epochs=nb_epochs,

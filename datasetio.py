@@ -5,6 +5,7 @@ Created on Wed Feb  9 10:36:43 2022
 @author: user
 """
 # Download the 56 zip files in Images_png in batches
+import random
 from urllib import request
 import hashlib
 import os
@@ -185,10 +186,34 @@ def flatten_dataset(input_dir, output_dir):
     shutil.rmtree(input_dir, ignore_errors=True)
 
 
-def create_dataset(start_index=0, end_index=len(links), output_dir="dataset"):
+def split_dataset(input_dir, train_dir, val_dir, train_ratio):
+    f = []
+    for (dirpath, dirnames, filenames) in os.walk(input_dir):
+        f.extend(filenames)
+        break
+    random.shuffle(f)
+    size1 = int(len(f) * train_ratio)
+    l1 = f[:size1]
+    l2 = f[size1:]
+
+    for file_name in l1:
+        in_file_path = os.path.join(input_dir, file_name)
+        out_file_path = os.path.join(train_dir, file_name)
+        shutil.move(in_file_path, out_file_path)
+    print(f"done moving {len(l1)} files to \"{train_dir}\"")
+    for file_name in l2:
+        in_file_path = os.path.join(input_dir, file_name)
+        out_file_path = os.path.join(val_dir, file_name)
+        shutil.move(in_file_path, out_file_path)
+    print(f"done moving {len(l2)} files to \"{val_dir}\"")
+
+
+def create_dataset(start_index=0, end_index=len(links), train_dir="dataset",val_dir="val",train_ratio=0.7):
     download(start_index=start_index, end_index=end_index)
     unzip_dataset(start_index=start_index, end_index=end_index, output_dir="tmp")
-    flatten_dataset("tmp", output_dir)
+    os.mkdir("tmp2")
+    flatten_dataset("tmp", "tmp2")
+    split_dataset(input_dir="tmp2",train_dir=train_dir,val_dir=val_dir,train_ratio=train_ratio)
 
 
 if __name__ == '__main__':
