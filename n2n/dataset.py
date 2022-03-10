@@ -64,9 +64,10 @@ def create_train_dataset(dataset_path, batch_size):
 
     image_ds = list_ds.map(read_image,num_parallel_calls=num_threads)
 
-    duplicated_ds = image_ds.flat_map(dup_ds)
+    #duplicated_ds = image_ds.flat_map(dup_ds)
+    #augmented_ds = duplicated_ds.map(augment_train, num_parallel_calls=num_threads)
 
-    augmented_ds = duplicated_ds.map(augment_train,num_parallel_calls=num_threads)
+    augmented_ds = image_ds.map(augment_train,num_parallel_calls=num_threads)
 
     shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
 
