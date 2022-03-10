@@ -1,11 +1,6 @@
 import tensorflow as tf
-
-import pathlib
-import os
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
-import matplotlib.image as mpimg
 
 np.set_printoptions(precision=4)
 
@@ -24,10 +19,7 @@ def read_image(filename):
     image = tf.io.read_file(filename)
     image = tf.io.decode_png(image)
     image = tf.image.convert_image_dtype(image, tf.uint16)
-    image = tf.image.resize(image, [512, 512])
-    image = tf.squeeze(image)
     [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16])
-    image.set_shape([512, 512])
     return image
 
 
@@ -44,36 +36,28 @@ def wgn(x, snr):
 
 
 def addNoise(img, db, noise_gen):
-    w = tf.py_function(noise_gen, [img, db], [tf.float32])
-    noisy_img = tf.add(img, w)
-    return tf.squeeze(noisy_img)
+    w = noise_gen(img, db).astype(np.int16)
+    noisy_img = img + w
+    return noisy_img
 
 
 def augment_train(image):
     noise_db = 10.0
     noisy_1 = addNoise(image, noise_db, wgn)
-    noisy_1 = tf.expand_dims(noisy_1, -1)
-    noisy_1.set_shape([512, 512,1])
     noisy_2 = addNoise(image, noise_db, wgn)
-    noisy_2 = tf.expand_dims(noisy_2, -1)
-    noisy_2.set_shape([512, 512,1])
     return noisy_1, noisy_2
 
 
 def augment_val(image):
     noise_db = 10.0
     clean = image
-    clean = tf.expand_dims(clean,-1)
-    clean.set_shape([512, 512, 1])
     noisy = addNoise(image, noise_db, wgn)
-    noisy = tf.expand_dims(noisy, -1)
-    noisy.set_shape([512, 512,1])
     return noisy, clean
 
 
 def create_train_dataset(dataset_path, batch_size):
     print('Setting up training dataset source from', dataset_path)
-    num_threads = 2
+    num_threads = tf.data.experimental.AUTOTUNE
     buf_size = 100
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
@@ -88,12 +72,12 @@ def create_train_dataset(dataset_path, batch_size):
 
     batched_ds = shuffled_ds.batch(batch_size)
 
-    return batched_ds
+    return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
 
 
 def create_val_dataset(dataset_path, batch_size):
     print('Setting up validation dataset source from', dataset_path)
-    num_threads = 2
+    num_threads = tf.data.experimental.AUTOTUNE
     buf_size = 100
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
@@ -106,5 +90,5 @@ def create_val_dataset(dataset_path, batch_size):
 
     batched_ds = shuffled_ds.batch(batch_size)
 
-    return batched_ds
+    return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
 

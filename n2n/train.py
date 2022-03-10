@@ -30,8 +30,6 @@ def get_args(input_args):
                         help="train image dir")
     parser.add_argument("--test_dir", type=str, required=True,
                         help="test image dir")
-    parser.add_argument("--image_size", type=int, default=64,
-                        help="training patch size")
     parser.add_argument("--batch_size", type=int, default=16,
                         help="batch size")
     parser.add_argument("--network_depth", type=int, default=4,
@@ -61,7 +59,6 @@ def main(*input_args):
     args = get_args(input_args)
     image_dir = args.image_dir
     test_dir = args.test_dir
-    image_size = args.image_size
     batch_size = args.batch_size
     nb_epochs = args.nb_epochs
     lr = args.lr
@@ -75,7 +72,7 @@ def main(*input_args):
     if args.weight is not None:
         model.load_weights(args.weight)
 
-    opt = Adam(lr=lr)
+    opt = Adam(learning_rate=lr)
     callbacks = []
 
     if loss_type == "huber":
