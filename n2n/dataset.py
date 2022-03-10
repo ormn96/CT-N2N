@@ -52,8 +52,10 @@ def addNoise(img, db, noise_gen):
 def augment_train(image):
     noise_db = 10.0
     noisy_1 = addNoise(image, noise_db, wgn)
+    noisy_1 = tf.expand_dims(noisy_1, -1)
     noisy_1.set_shape([512, 512,1])
     noisy_2 = addNoise(image, noise_db, wgn)
+    noisy_2 = tf.expand_dims(noisy_2, -1)
     noisy_2.set_shape([512, 512,1])
     return noisy_1, noisy_2
 
@@ -61,8 +63,10 @@ def augment_train(image):
 def augment_val(image):
     noise_db = 10.0
     clean = image
+    clean = tf.expand_dims(clean,-1)
     clean.set_shape([512, 512, 1])
     noisy = addNoise(image, noise_db, wgn)
+    noisy = tf.expand_dims(noisy, -1)
     noisy.set_shape([512, 512,1])
     return noisy, clean
 
