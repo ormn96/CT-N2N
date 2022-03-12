@@ -13,7 +13,8 @@ def show(image):
 
 
 def ct_intensity_to_HU(image):
-    return image.numpy().astype(np.float32, copy=False) - 32768
+    im = image.numpy().astype(np.float32, copy=False) - 32768
+    return (im - (-1024))/(3071 + 1024)
 
 
 def read_image(filename):
