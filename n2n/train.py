@@ -70,6 +70,8 @@ def main(*input_args):
     output_path = Path(args.output_path)
     net_depth = args.network_depth
     model = get_unet_model(depth=net_depth)
+    image_size = args.image_size
+    image_shape = [image_size,image_size,1]
 
     if args.weight is not None:
         model.load_weights(args.weight)
@@ -82,8 +84,8 @@ def main(*input_args):
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
     ##
-    train_ds = dataset.create_train_dataset(image_dir,batch_size=batch_size)
-    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size)
+    train_ds = dataset.create_train_dataset(image_dir,batch_size=batch_size, image_shape=image_shape)
+    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, image_shape=image_shape)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
     callbacks.append(LearningRateScheduler(schedule=Schedule(nb_epochs, lr)))
