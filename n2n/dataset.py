@@ -12,13 +12,13 @@ def show(image):
 
 
 def ct_intensity_to_HU(image):
-    return (image.numpy().astype(np.float32, copy=False) - 32768).astype(np.int16, copy=False)
+    return image.numpy().astype(np.float32, copy=False) - 32768
 
 
 def read_image(filename):
     image = tf.io.read_file(filename, name="read_image")
     image = tf.io.decode_png(image, dtype=tf.uint16, name="decode_image")
-    [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16], name="convert_to_hu")
+    [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.float32], name="convert_to_hu")
     return image
 
 
@@ -30,21 +30,19 @@ def wgn(shape, std):
     return np.random.normal(0.0, std, shape)
 
 
-def addNoise(image, image_shape, std, noise_gen):
-    w = noise_gen(image_shape, std).astype(np.int16)
-    noisy_img = image + w
-    return noisy_img
+def addNoise(image, std):
+    n = tf.random.normal(shape=image.shape, mean=0.0, stddev=std, name="noise_gen")
+    return tf.add(image, n, name="noise_add")
 
 
-def create_train_dataset(dataset_path, batch_size, image_shape):
+def create_train_dataset(dataset_path, batch_size, noise_std):
     print('Setting up training dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
     buf_size = 100
 
     def augment_train(image):
-        noise_std = 0.015
-        noisy_1 = addNoise(image, image_shape, noise_std, wgn)
-        noisy_2 = addNoise(image, image_shape, noise_std, wgn)
+        noisy_1 = addNoise(image, noise_std)
+        noisy_2 = addNoise(image, noise_std)
         return noisy_1, noisy_2
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
@@ -64,15 +62,14 @@ def create_train_dataset(dataset_path, batch_size, image_shape):
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
 
 
-def create_val_dataset(dataset_path, batch_size, image_shape):
+def create_val_dataset(dataset_path, batch_size, noise_std):
     print('Setting up validation dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
     buf_size = 100
 
     def augment_val(image):
-        noise_std = 0.015
         clean = image
-        noisy = addNoise(image, image_shape, noise_std, wgn)
+        noisy = addNoise(image, noise_std)
         return noisy, clean
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))

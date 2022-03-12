@@ -15,7 +15,7 @@ def tf_log10(x):
 
 
 def PSNR(y_true, y_pred):
-    max_pixel = np.iinfo(np.int16).max - np.iinfo(np.int16).min
+    max_pixel = 1.0
     return 10.0 * tf_log10((max_pixel ** 2) / (K.mean(K.square(y_pred - y_true))))
 
 

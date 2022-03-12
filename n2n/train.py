@@ -30,8 +30,6 @@ def get_args(input_args):
                         help="train image dir")
     parser.add_argument("--test_dir", type=str, required=True,
                         help="test image dir")
-    parser.add_argument("--image_size", type=int, required=True,
-                        help="image size for noise creation")
     parser.add_argument("--batch_size", type=int, default=16,
                         help="batch size")
     parser.add_argument("--network_depth", type=int, default=4,
@@ -48,6 +46,8 @@ def get_args(input_args):
                         help="loss; mse', 'mae', or 'huber' is expected")
     parser.add_argument("--huber_loss_delta", type=float, default=1.5,
                         help="huber loss delta parameter")
+    parser.add_argument("--noise_std", type=float, default=0.015,
+                        help="gaussian noise standard deviation")
     parser.add_argument("--weight", type=str, default=None,
                         help="weight file for restart")
     parser.add_argument("--output_path", type=str, default="checkpoints",
@@ -69,9 +69,8 @@ def main(*input_args):
     loss_type = args.loss
     output_path = Path(args.output_path)
     net_depth = args.network_depth
+    noise_std = args.noise_std
     model = get_unet_model(depth=net_depth)
-    image_size = args.image_size
-    image_shape = [image_size,image_size,1]
 
     if args.weight is not None:
         model.load_weights(args.weight)
@@ -84,8 +83,8 @@ def main(*input_args):
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
     ##
-    train_ds = dataset.create_train_dataset(image_dir,batch_size=batch_size, image_shape=image_shape)
-    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, image_shape=image_shape)
+    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std)
+    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
     callbacks.append(LearningRateScheduler(schedule=Schedule(nb_epochs, lr)))
