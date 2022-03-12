@@ -1,6 +1,7 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
+from tensorflow.keras.layers import GaussianNoise
 
 np.set_printoptions(precision=4)
 
@@ -39,10 +40,11 @@ def create_train_dataset(dataset_path, batch_size, noise_std):
     print('Setting up training dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
     buf_size = 100
+    noise_adder = GaussianNoise(noise_std)
 
     def augment_train(image):
-        noisy_1 = addNoise(image, noise_std)
-        noisy_2 = addNoise(image, noise_std)
+        noisy_1 = noise_adder(image, training=True)
+        noisy_2 = noise_adder(image, training=True)
         return noisy_1, noisy_2
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
@@ -66,10 +68,11 @@ def create_val_dataset(dataset_path, batch_size, noise_std):
     print('Setting up validation dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
     buf_size = 100
+    noise_adder = GaussianNoise(noise_std)
 
     def augment_val(image):
         clean = image
-        noisy = addNoise(image, noise_std)
+        noisy = noise_adder(image, training=True)
         return noisy, clean
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))

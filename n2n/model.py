@@ -5,7 +5,6 @@ from tensorflow.keras.layers import BatchNormalization
 from keras.callbacks import Callback
 from keras import backend as K
 import tensorflow as tf
-import numpy as  np
 
 
 def tf_log10(x):
