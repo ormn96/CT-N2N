@@ -16,10 +16,9 @@ def ct_intensity_to_HU(image):
 
 
 def read_image(filename):
-    image = tf.io.read_file(filename)
-    image = tf.io.decode_png(image)
-    image = tf.image.convert_image_dtype(image, tf.uint16)
-    [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16])
+    image = tf.io.read_file(filename, name="read_image")
+    image = tf.io.decode_png(image, dtype=tf.uint16, name="decode_image")
+    [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16], name="convert_to_hu")
     return image
 
 
@@ -57,9 +56,10 @@ def create_train_dataset(dataset_path, batch_size, image_shape):
 
     augmented_ds = image_ds.map(augment_train, num_parallel_calls=num_threads)
 
-    shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
+    #shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
+    #batched_ds = shuffled_ds.batch(batch_size)
 
-    batched_ds = shuffled_ds.batch(batch_size)
+    batched_ds = augmented_ds.batch(batch_size)
 
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
 
@@ -81,8 +81,9 @@ def create_val_dataset(dataset_path, batch_size, image_shape):
 
     augmented_ds = image_ds.map(augment_val, num_parallel_calls=num_threads)
 
-    shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
+    #shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
+    #batched_ds = shuffled_ds.batch(batch_size)
 
-    batched_ds = shuffled_ds.batch(batch_size)
+    batched_ds = augmented_ds.batch(batch_size)
 
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
