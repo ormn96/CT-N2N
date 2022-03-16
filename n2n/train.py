@@ -6,7 +6,7 @@ from tensorflow.keras.optimizers import Adam
 from model import get_unet_model, PSNR
 from tensorflow.keras.losses import Huber
 import dataset
-
+import json
 
 class Schedule:
     def __init__(self, nb_epochs, initial_lr):
@@ -71,6 +71,9 @@ def main(*input_args):
     net_depth = args.network_depth
     noise_std = args.noise_std
     model = get_unet_model(depth=net_depth)
+
+    with open(output_path.joinpath("args.txt"), 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
 
     if args.weight is not None:
         model.load_weights(args.weight)

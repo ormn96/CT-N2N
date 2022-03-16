@@ -1,7 +1,6 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from tensorflow.keras.layers import GaussianNoise
 
 np.set_printoptions(precision=4)
 
@@ -12,15 +11,17 @@ def show(image):
     plt.axis('off')
 
 
+# CT need to be transformed from uint16 to int16
+# HU values are from [-1204 : 3071]
 def ct_intensity_to_HU(image):
     im = image.numpy().astype(np.float32, copy=False) - 32768
-    return (im - (-1024))/(3071 + 1024)
+    return (im - (-1024)).astype(np.int16, copy=False)
 
 
 def read_image(filename):
     image = tf.io.read_file(filename, name="read_image")
     image = tf.io.decode_png(image, dtype=tf.uint16, name="decode_image")
-    [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.float32], name="convert_to_hu")
+    [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16], name="convert_to_hu")
     return image
 
 
@@ -28,24 +29,19 @@ def dup_ds(image):
     return tf.data.Dataset.from_tensors(image).repeat(2)
 
 
-def wgn(shape, std):
-    return np.random.normal(0.0, std, shape)
-
-
+# std in HU values is treated as float and then transformed to int6 in the hu range(4096)
 def addNoise(image, std):
-    n = tf.random.normal(shape=image.shape, mean=0.0, stddev=std, name="noise_gen")
-    return tf.add(image, n, name="noise_add")
+    n = tf.random.normal(shape=image.shape, mean=0.0, stddev=std, name="noise_gen") * 4096
+    return tf.add(image, tf.cast(n, tf.int16), name="noise_add")
 
 
 def create_train_dataset(dataset_path, batch_size, noise_std):
     print('Setting up training dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
-    buf_size = 100
-    noise_adder = GaussianNoise(noise_std)
 
     def augment_train(image):
-        noisy_1 = noise_adder(image, training=True)
-        noisy_2 = noise_adder(image, training=True)
+        [noisy_1, ] = tf.py_function(addNoise, [image, noise_std], [tf.int16], name="noise_add_train_1")
+        [noisy_2, ] = tf.py_function(addNoise, [image, noise_std], [tf.int16], name="noise_add_train_2")
         return noisy_1, noisy_2
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
@@ -57,9 +53,6 @@ def create_train_dataset(dataset_path, batch_size, noise_std):
 
     augmented_ds = image_ds.map(augment_train, num_parallel_calls=num_threads)
 
-    #shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
-    #batched_ds = shuffled_ds.batch(batch_size)
-
     batched_ds = augmented_ds.batch(batch_size)
 
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
@@ -68,12 +61,10 @@ def create_train_dataset(dataset_path, batch_size, noise_std):
 def create_val_dataset(dataset_path, batch_size, noise_std):
     print('Setting up validation dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
-    buf_size = 100
-    noise_adder = GaussianNoise(noise_std)
 
     def augment_val(image):
         clean = image
-        noisy = noise_adder(image, training=True)
+        [noisy, ] = tf.py_function(addNoise, [image, noise_std], [tf.int16], name="noise_add_val")
         return noisy, clean
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
@@ -81,9 +72,6 @@ def create_val_dataset(dataset_path, batch_size, noise_std):
     image_ds = list_ds.map(read_image, num_parallel_calls=num_threads)
 
     augmented_ds = image_ds.map(augment_val, num_parallel_calls=num_threads)
-
-    #shuffled_ds = augmented_ds.shuffle(buffer_size=buf_size)
-    #batched_ds = shuffled_ds.batch(batch_size)
 
     batched_ds = augmented_ds.batch(batch_size)
 
