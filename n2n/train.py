@@ -72,9 +72,6 @@ def main(*input_args):
     noise_std = args.noise_std
     model = get_unet_model(depth=net_depth)
 
-    with open(output_path.joinpath("args.txt"), 'w') as f:
-        json.dump(args.__dict__, f, indent=2)
-
     if args.weight is not None:
         model.load_weights(args.weight)
 
@@ -90,6 +87,10 @@ def main(*input_args):
     val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
+    
+    with open(output_path.joinpath("args.txt"), 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
+
     callbacks.append(LearningRateScheduler(schedule=Schedule(nb_epochs, lr)))
     callbacks.append(ModelCheckpoint(str(output_path) + "/weights.{epoch:03d}-{val_loss:.3f}-{val_PSNR:.5f}.hdf5",
                                      monitor="val_PSNR",
