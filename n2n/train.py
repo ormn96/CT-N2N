@@ -87,7 +87,7 @@ def main(*input_args):
     val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     with open(output_path.joinpath("args.txt"), 'w') as f:
         json.dump(args.__dict__, f, indent=2)
 
