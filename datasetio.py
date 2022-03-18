@@ -6,7 +6,7 @@ Created on Wed Feb  9 10:36:43 2022
 """
 # Download the 56 zip files in Images_png in batches
 import random
-from urllib import request
+from urllib import request, error as urlerror
 import hashlib
 import os
 import shutil
@@ -104,12 +104,23 @@ def reporthook(t):
     return inner
 
 
-def download(start_index=0, end_index=len(links), to_check_md5=True, md5_web_fetch=True):
+def download(start_index=0, end_index=len(links), to_check_md5=True, md5_web_fetch=True, max_tries=5):
     for idx, link, prog in prog_iter(list(enumerate(links))[start_index:end_index]):
-        fn = 'Images_png_%02d.zip' % (idx + 1)
-        print(prog, '- downloading', fn, '...')
-        with tqdm(unit='B', miniters=1, unit_scale=True, desc="Downloading") as t:
-            request.urlretrieve(link, fn, reporthook(t))  # download the zip file
+        for _ in range(max_tries):
+            try:
+                fn = 'Images_png_%02d.zip' % (idx + 1)
+                if os.path.exists(fn):
+                    print(prog, '- file exists', fn, ', skipping')
+                    break
+                print(prog, '- downloading', fn, '...')
+                with tqdm(unit='B', miniters=1, unit_scale=True, desc="Downloading") as t:
+                    request.urlretrieve(link, fn, reporthook(t))  # download the zip file
+            except urlerror.URLError:
+                print(prog, f"- error downloading")
+                continue
+            else:
+                break
+
     if to_check_md5:
         print("Download complete. checking the MD5 checksums")
         md5_dict = __parseMD5(webFetch=md5_web_fetch)
