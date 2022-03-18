@@ -28,7 +28,7 @@ def get_args(input_args):
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--image_dir", type=str, required=True,
                         help="train image dir")
-    parser.add_argument("--image_size", type=str, required=True,
+    parser.add_argument("--image_size", type=int, required=True,
                         help="image size")
     parser.add_argument("--test_dir", type=str, required=True,
                         help="test image dir")
