@@ -1,10 +1,23 @@
 from tqdm import tqdm
 from zipfile import ZipFile
+import shutil
 import os
 
 
-def finish(output_path, output_zip_path, download_in_colab=False):
+def finish(output_path, output_zip_path, copy_path=None, download_in_colab=False):
     create_output_zip(output_path, output_zip_path)
+    if copy_path:
+        try:
+            shutil.copy(output_zip_path, copy_path)
+        # If source and destination are same
+        except shutil.SameFileError:
+            print("Source and destination represents the same file.")
+        # If there is any permission issue
+        except PermissionError:
+            print("Permission denied.")
+        # For other errors
+        except:
+            print("Error occurred while copying file.")
     if download_in_colab:
         from google.colab import files
         files.download(output_zip_path)
