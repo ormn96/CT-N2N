@@ -18,9 +18,10 @@ def ct_intensity_to_HU(image):
     return (im - (-1024)).astype(np.int16, copy=False)
 
 
-def read_image(filename):
+def read_image(filename, image_size):
     image = tf.io.read_file(filename, name="read_image")
     image = tf.io.decode_png(image, dtype=tf.uint16, name="decode_image")
+    image = tf.image.resize_with_crop_or_pad(image, image_size, image_size)
     [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16], name="convert_to_hu")
     return image
 
@@ -35,7 +36,7 @@ def addNoise(image, std):
     return tf.add(image, tf.cast(n, tf.int16), name="noise_add")
 
 
-def create_train_dataset(dataset_path, batch_size, noise_std):
+def create_train_dataset(dataset_path, batch_size, noise_std, image_size):
     print('Setting up training dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
 
@@ -44,9 +45,12 @@ def create_train_dataset(dataset_path, batch_size, noise_std):
         [noisy_2, ] = tf.py_function(addNoise, [image, noise_std], [tf.int16], name="noise_add_train_2")
         return noisy_1, noisy_2
 
+    def _read_image(filename):
+        return read_image(filename, image_size)
+
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
 
-    image_ds = list_ds.map(read_image, num_parallel_calls=num_threads)
+    image_ds = list_ds.map(_read_image, num_parallel_calls=num_threads).fil
 
     # duplicated_ds = image_ds.flat_map(dup_ds)
     # augmented_ds = duplicated_ds.map(augment_train, num_parallel_calls=num_threads)
@@ -58,7 +62,7 @@ def create_train_dataset(dataset_path, batch_size, noise_std):
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
 
 
-def create_val_dataset(dataset_path, batch_size, noise_std):
+def create_val_dataset(dataset_path, batch_size, noise_std, image_size):
     print('Setting up validation dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
 
@@ -67,9 +71,12 @@ def create_val_dataset(dataset_path, batch_size, noise_std):
         [noisy, ] = tf.py_function(addNoise, [image, noise_std], [tf.int16], name="noise_add_val")
         return noisy, clean
 
+    def _read_image(filename):
+        return read_image(filename, image_size)
+
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
 
-    image_ds = list_ds.map(read_image, num_parallel_calls=num_threads)
+    image_ds = list_ds.map(_read_image, num_parallel_calls=num_threads)
 
     augmented_ds = image_ds.map(augment_val, num_parallel_calls=num_threads)
 

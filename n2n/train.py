@@ -28,6 +28,8 @@ def get_args(input_args):
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--image_dir", type=str, required=True,
                         help="train image dir")
+    parser.add_argument("--image_size", type=str, required=True,
+                        help="image size")
     parser.add_argument("--test_dir", type=str, required=True,
                         help="test image dir")
     parser.add_argument("--batch_size", type=int, default=16,
@@ -71,6 +73,7 @@ def main(*input_args):
     net_depth = args.network_depth
     noise_std = args.noise_std
     model = get_unet_model(depth=net_depth)
+    size = args.image_size
 
     if args.weight is not None:
         model.load_weights(args.weight)
@@ -83,8 +86,8 @@ def main(*input_args):
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
     ##
-    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std)
-    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std)
+    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std, image_size=size)
+    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std, image_size=size)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
 
