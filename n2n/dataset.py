@@ -50,7 +50,7 @@ def create_train_dataset(dataset_path, batch_size, noise_std, image_size):
 
     list_ds = tf.data.Dataset.list_files(str(dataset_path + '/*'))
 
-    image_ds = list_ds.map(_read_image, num_parallel_calls=num_threads).fil
+    image_ds = list_ds.map(_read_image, num_parallel_calls=num_threads)
 
     # duplicated_ds = image_ds.flat_map(dup_ds)
     # augmented_ds = duplicated_ds.map(augment_train, num_parallel_calls=num_threads)
