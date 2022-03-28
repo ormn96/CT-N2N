@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_args():
+def get_args(*args):
     parser = argparse.ArgumentParser(description="This script plots training history",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--input1", type=str, required=True,
@@ -12,18 +12,17 @@ def get_args():
     parser.add_argument("--input2", type=str, default=None,
                         help="path to input checkout directory 2 (must include history.npz) "
                              "if you want to compare it with input1")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     return args
 
 
-def main():
-    args = get_args()
+def main(*args):
+    args = get_args(*args)
     input_paths = [Path(args.input1).joinpath("history.npz")]
 
     if args.input2:
         input_paths.append(Path(args.input2).joinpath("history.npz"))
-
-    datum = [(np.array(np.load(str(input_path))["history"], ndmin=1)[0], input_path.parent.name)
+    datum = [(np.array(np.load(str(input_path), allow_pickle=True)["history"], ndmin=1)[0], input_path.parent.name)
              for input_path in input_paths]
     metrics = ["val_loss", "val_PSNR"]
 
@@ -38,4 +37,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main("--input1=tmp")
