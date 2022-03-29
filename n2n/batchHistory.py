@@ -25,13 +25,24 @@ class BatchHistory(keras.callbacks.Callback):
                 np.load(str(output_path+'batch_history.npz'), allow_pickle=True)['batch_history']
     """
 
-    def __init__(self, metrics=None, output_path=None):
+    def __init__(self, metrics=None, reduced=True, output_path=None):
         super().__init__()
         if metrics is None:
             metrics = ['loss']
         self.history = None
         self.metrics = metrics
         self.output_path = output_path
+        self.reduced = reduced
+        if not reduced:
+            def on_epoch_begin(epoch, logs={}):
+                for k in self.metrics:
+                    self.history[k].append([])
+            self.on_epoch_begin = on_epoch_begin
+
+            def on_batch_end(batch, logs={}):
+                for k in self.metrics:
+                    self.history[k][-1].append(logs.get(k))
+            self.on_batch_end = on_batch_end
 
     def on_train_begin(self, logs={}):
         self.history = {k: [] for k in self.metrics}
