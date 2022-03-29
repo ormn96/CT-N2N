@@ -1,22 +1,5 @@
 import tensorflow.keras as keras
 
-"""
-    
-
-        Parameters
-        ----------
-            metrics :
-                
-
-            output_path :
-                
-
-            reduced : boolean
-                
-        
-    """
-
-
 class BatchHistory(keras.callbacks.Callback):
 
     def __init__(self, *, metrics=None, reduced=True, output_path=None):
