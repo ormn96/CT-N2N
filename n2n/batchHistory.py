@@ -1,31 +1,44 @@
 import tensorflow.keras as keras
 
-
-class BatchHistory(keras.callbacks.Callback):
-    """
-    create history in the end of every batch
+"""
+    
 
         Parameters
         ----------
             metrics :
-                list of values to log.
-
-                default ['loss'].
+                
 
             output_path :
-                path to folder to write the object after the train ended, if None, do not save automatically.
+                
 
-                the function save_history(self, output_path="") will be called
-                with this parameter at the end of the training.
+            reduced : boolean
+                
+        
+    """
 
-                default = None
+
+class BatchHistory(keras.callbacks.Callback):
+
+    def __init__(self, *, metrics=None, reduced=True, output_path=None):
+        """
+        create history in the end of every batch
+
         Notes
         -----
             use the following code to access the saved history:
-                np.load(str(output_path+'batch_history.npz'), allow_pickle=True)['batch_history']
-    """
+            np.load(str(output_path+'batch_history.npz'), allow_pickle=True)['batch_history']
 
-    def __init__(self, *, metrics=None, reduced=True, output_path=None):
+
+        :param metrics:
+            list of values to log. default ['loss'].
+        :param reduced:
+            the history will be flattened(True) or grouped per epoch(False). default = True
+        :param output_path:
+            path to folder to write the object after the train ended, if None, do not save automatically.
+            the function save_history(self, output_path="") will be called
+            with this parameter at the end of the training.
+            default = None
+        """
         super().__init__()
         if metrics is None:
             metrics = ['loss']
