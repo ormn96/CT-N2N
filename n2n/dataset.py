@@ -21,7 +21,7 @@ def ct_intensity_to_HU(image):
 def read_image(filename, image_size):
     image = tf.io.read_file(filename, name="read_image")
     image = tf.io.decode_png(image, dtype=tf.uint16, name="decode_image")
-    image = tf.image.random_crop(image,(image_size,image_size))
+    image = tf.image.random_crop(image,(image_size,image_size,1))
     [image, ] = tf.py_function(ct_intensity_to_HU, [image], [tf.int16], name="convert_to_hu")
     return image
 
