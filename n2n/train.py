@@ -74,9 +74,12 @@ def main(*input_args):
     noise_std = args.noise_std
     model = get_unet_model(depth=net_depth)
     size = args.image_size
+    epoch_to_start = 0
 
     if args.weight is not None:
+        import os.path as path
         model.load_weights(args.weight)
+        epoch_to_start = int(path.basename(output_path).partition('weights.')[2].partition('-')[0])
 
     opt = Adam(learning_rate=lr)
     callbacks = []
@@ -107,7 +110,8 @@ def main(*input_args):
         callbacks=callbacks,
         validation_data=val_ds,
         steps_per_epoch=steps,
-        validation_steps=val_steps
+        validation_steps=val_steps,
+        initial_epoch=epoch_to_start
     )
 
     np.savez(str(output_path.joinpath("history.npz")), history=hist.history)
