@@ -79,7 +79,7 @@ def main(*input_args):
     if args.weight is not None:
         import os.path as path
         model.load_weights(args.weight)
-        epoch_to_start = int(path.basename(output_path).partition('weights.')[2].partition('-')[0])
+        epoch_to_start = int(path.basename(args.weight).partition('weights.')[2].partition('-')[0])
 
     opt = Adam(learning_rate=lr)
     callbacks = []
