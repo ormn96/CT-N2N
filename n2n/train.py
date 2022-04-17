@@ -7,6 +7,7 @@ from model import get_unet_model, PSNR
 from tensorflow.keras.losses import Huber
 import dataset
 import json
+from history_watcher import HistoryWatcher
 
 class Schedule:
     def __init__(self, nb_epochs, initial_lr):
@@ -103,6 +104,7 @@ def main(*input_args):
                                      verbose=1,
                                      mode="max",
                                      save_best_only=True))
+    callbacks.append(HistoryWatcher(output_path=str(output_path) + "/history_watched.csv"))
     hist = model.fit(
         x=train_ds,
         epochs=nb_epochs,
