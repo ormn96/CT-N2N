@@ -103,6 +103,7 @@ def main(*input_args):
                                      monitor="val_PSNR",
                                      verbose=1,
                                      mode="max",
+                                     save_weights_only=True,
                                      save_best_only=True))
     callbacks.append(HistoryWatcher(output_path=str(output_path) + "/history_watched.csv"))
     hist = model.fit(
