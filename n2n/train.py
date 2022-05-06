@@ -8,6 +8,8 @@ from tensorflow.keras.losses import Huber
 import dataset
 import json
 from history_watcher import HistoryWatcher
+from sqrtMSE import SqrtMSE
+
 
 class Schedule:
     def __init__(self, nb_epochs, initial_lr):
@@ -87,6 +89,8 @@ def main(*input_args):
 
     if loss_type == "huber":
         loss_type = Huber(args.huber_loss_delta)
+    if loss_type == "sqrtMSE":
+        loss_type = SqrtMSE()
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
     ##
