@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from util.CsvReader import CsvReader
 
 
-def main(input_path, npz_hist: dict, csv_hist: dict):
+def main(input_path,output_path,output_name, npz_hist: dict, csv_hist: dict):
     npz_input_paths = [(Path(input_path).joinpath(h, "history.npz"), n) for n, h in npz_hist.items()]
     csv_input_paths = [(Path(input_path).joinpath(h, "history_watched.csv"), n) for n, h in csv_hist.items()]
     datum = [(np.array(np.load(str(input_path), allow_pickle=True)["history"], ndmin=1)[0], n)
@@ -18,9 +18,9 @@ def main(input_path, npz_hist: dict, csv_hist: dict):
         plt.xlabel("epochs")
         plt.ylabel(metric)
         plt.legend()
-        plt.savefig(metric + ".png")
+        plt.savefig(Path(output_path).joinpath(output_name+'_'+metric + ".png"))
         plt.cla()
 
 
 if __name__ == '__main__':
-    main("", dict(), {'test': "."})
+    main("","","", dict(), {'test': "."})
