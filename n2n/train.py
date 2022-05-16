@@ -43,6 +43,8 @@ def get_args(input_args):
                         help="number of epochs")
     parser.add_argument("--lr", type=float, default=0.01,
                         help="learning rate")
+    parser.add_argument("--disable_lr_Sched", type=bool,
+                        help="disable learning rate scheduler")
     parser.add_argument("--steps", type=int, default=None,
                         help="steps per epoch")
     parser.add_argument("--val_steps", type=int, default=None,
@@ -102,7 +104,10 @@ def main(*input_args):
     with open(output_path.joinpath("args.txt"), 'w') as f:
         json.dump(args.__dict__, f, indent=2)
 
-    callbacks.append(LearningRateScheduler(schedule=Schedule(nb_epochs, lr)))
+    if not args.disable_lr_Sched:
+        callbacks.append(LearningRateScheduler(schedule=Schedule(nb_epochs, lr)))
+    else:
+        print("Learning rate scheduler disabled")
     callbacks.append(ModelCheckpoint(str(output_path) + "/weights.{epoch:03d}-{val_loss:.3f}-{val_PSNR:.5f}.hdf5",
                                      monitor="val_PSNR",
                                      verbose=1,
