@@ -63,7 +63,7 @@ def get_args(input_args):
                         help="make the dataset infinite")
     args = parser.parse_args(input_args)
 
-    if args.infinite_dataset and ((args.val_steps is not None) or (args.steps is not None)):
+    if args.infinite_dataset and ((args.val_steps is None) or (args.steps is None)):
         raise ValueError('"--infinite_dataset" is set but "--val_steps" or "--steps" is None')
     return args
 
