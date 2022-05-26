@@ -36,7 +36,7 @@ def addNoise(image, std):
     return tf.add(image, tf.cast(n, tf.int16), name="noise_add")
 
 
-def create_train_dataset(dataset_path, batch_size, noise_std, image_size):
+def create_train_dataset(dataset_path, batch_size, noise_std, image_size,inf=False):
     print('Setting up training dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
 
@@ -57,12 +57,14 @@ def create_train_dataset(dataset_path, batch_size, noise_std, image_size):
 
     augmented_ds = image_ds.map(augment_train, num_parallel_calls=num_threads)
 
-    batched_ds = augmented_ds.batch(batch_size)
+    inf_ds = augmented_ds.repeat() if inf else augmented_ds
+
+    batched_ds = inf_ds.batch(batch_size)
 
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)
 
 
-def create_val_dataset(dataset_path, batch_size, noise_std, image_size):
+def create_val_dataset(dataset_path, batch_size, noise_std, image_size,inf=False):
     print('Setting up validation dataset source from', dataset_path)
     num_threads = tf.data.experimental.AUTOTUNE
 
@@ -80,6 +82,8 @@ def create_val_dataset(dataset_path, batch_size, noise_std, image_size):
 
     augmented_ds = image_ds.map(augment_val, num_parallel_calls=num_threads)
 
-    batched_ds = augmented_ds.batch(batch_size)
+    inf_ds = augmented_ds.repeat() if inf else augmented_ds
+
+    batched_ds = inf_ds.batch(batch_size)
 
     return batched_ds.prefetch(tf.data.experimental.AUTOTUNE)

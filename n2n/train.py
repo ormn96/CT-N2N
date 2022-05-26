@@ -59,8 +59,12 @@ def get_args(input_args):
                         help="weight file for restart")
     parser.add_argument("--output_path", type=str, default="checkpoints",
                         help="checkpoint dir")
+    parser.add_argument("--infinite_dataset", type=bool,
+                        help="make the dataset infinite")
     args = parser.parse_args(input_args)
 
+    if args.infinite_dataset and ((args.val_steps is not None) or (args.steps is not None)):
+        raise ValueError(f'"--infinite_dataset" is set but "{args.val_steps=}" or "{args.val_steps=}" is None')
     return args
 
 
@@ -96,8 +100,8 @@ def main(*input_args):
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
     ##
-    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std, image_size=size)
-    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std, image_size=size)
+    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std, image_size=size,inf=args.infinite_dataset)
+    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std, image_size=size,inf=args.infinite_dataset)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
 
