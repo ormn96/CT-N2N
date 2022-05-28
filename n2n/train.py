@@ -43,7 +43,7 @@ def get_args(input_args):
                         help="number of epochs")
     parser.add_argument("--lr", type=float, default=0.01,
                         help="learning rate")
-    parser.add_argument("--disable_lr_Sched", type=bool,
+    parser.add_argument("--disable_lr_Sched", action='store_true',
                         help="disable learning rate scheduler")
     parser.add_argument("--steps", type=int, default=None,
                         help="steps per epoch")
@@ -59,7 +59,7 @@ def get_args(input_args):
                         help="weight file for restart")
     parser.add_argument("--output_path", type=str, default="checkpoints",
                         help="checkpoint dir")
-    parser.add_argument("--infinite_dataset", type=bool,
+    parser.add_argument("--infinite_dataset", action='store_true',
                         help="make the dataset infinite")
     args = parser.parse_args(input_args)
 

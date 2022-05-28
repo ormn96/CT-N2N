@@ -3,7 +3,6 @@ import numpy as np
 from pathlib import Path
 import cv2
 from model import get_unet_model
-from noise_model_test import get_noise_model
 
 
 def get_args(input_args):
@@ -13,14 +12,11 @@ def get_args(input_args):
                         help="test image dir")
     parser.add_argument("--network_depth", type=int, default=4,
                         help="encoder-decoder network depth")
-    parser.add_argument("--model", type=str, default="srresnet",
-                        help="model architecture ('srresnet' or 'unet')")
     parser.add_argument("--weight_file", type=str, required=True,
                         help="trained weight file")
-    parser.add_argument("--test_noise_model", type=str, default="text,0,25",
-                        help="noise model for test images")
     parser.add_argument("--output_dir", type=str, default=None,
                         help="if set, save resulting images otherwise show result using imshow")
+    parser.print_help()
     args = parser.parse_args(input_args)
     return args
 
@@ -59,7 +55,7 @@ def main(*input_args):
 
     for image_path in image_paths:
         image = cv2.imread(str(image_path), -1)
-        h, w, _ = image.shape
+        h, w = image.shape
 
         image_HU = ct_intensity_to_HU(image)
         pred = model.predict(np.expand_dims(image_HU, 0))
