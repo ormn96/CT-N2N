@@ -16,7 +16,6 @@ def get_args(input_args):
                         help="trained weight file")
     parser.add_argument("--output_dir", type=str, default=None,
                         help="if set, save resulting images otherwise show result using imshow")
-    parser.print_help()
     args = parser.parse_args(input_args)
     return args
 

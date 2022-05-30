@@ -138,7 +138,7 @@ optional arguments:
 ```
 #### Testing/Usage example
 ```commandline
-from n2n.test_model import main
+from n2n.use_model import main
 import tensorflow as tf
 
 folder_name = "results"
