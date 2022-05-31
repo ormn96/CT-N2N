@@ -1,4 +1,6 @@
 import argparse
+import math
+
 import numpy as np
 from pathlib import Path
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
@@ -24,6 +26,21 @@ class Schedule:
         elif epoch_idx < self.epochs * 0.75:
             return self.initial_lr * 0.25
         return self.initial_lr * 0.125
+
+
+class decay:
+    def __init__(self, normal_epochs,total_epochs, initial_lr,step_width=2):
+        self.decay_epochs = total_epochs - normal_epochs
+        self.normal = normal_epochs
+        self.initial_lr = initial_lr
+        self.step = step_width
+
+    def __call__(self, epoch_idx):
+        if epoch_idx < self.normal:
+            return self.initial_lr
+        decay_id = epoch_idx-self.normal
+        decay_step = decay_id // self.step
+        return self.initial_lr *(1-(decay_step/(self.decay_epochs/self.step)))
 
 
 def get_args(input_args):
@@ -100,8 +117,10 @@ def main(*input_args):
 
     model.compile(optimizer=opt, loss=loss_type, metrics=[PSNR])
     ##
-    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std, image_size=size,inf=args.infinite_dataset)
-    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std, image_size=size,inf=args.infinite_dataset)
+    train_ds = dataset.create_train_dataset(image_dir, batch_size=batch_size, noise_std=noise_std, image_size=size,
+                                            inf=args.infinite_dataset)
+    val_ds = dataset.create_val_dataset(test_dir, batch_size=batch_size, noise_std=noise_std, image_size=size,
+                                        inf=args.infinite_dataset)
     ##
     output_path.mkdir(parents=True, exist_ok=True)
 
