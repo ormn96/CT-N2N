@@ -1,6 +1,6 @@
 # Denoising using Noise-to-Noise
+## Abstract
 
-##Abstract
 In computed tomography (CT) imaging, image quality depends on the patient's exposure during the scan.
 Reducing the exposure reduces patients' health risks, but also reduces image quality due to higher noise in the image.
 A denoising technique preserving image features enables the acquisition of low-dose images without losing too much information.
