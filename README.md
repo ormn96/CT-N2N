@@ -1,26 +1,24 @@
 # Denoising using Noise-to-Noise
 ## Abstract
 
-In computed tomography (CT) imaging, image quality depends on the patient's exposure during the scan.
-Reducing the exposure reduces patients' health risks, but also reduces image quality due to higher noise in the image.
-A denoising technique preserving image features enables the acquisition of low-dose images without losing too much information.
-In this work, the performance of convolutional neural networks in denoising CT images was evaluated.
-    
-The peculiarity of the network is that it does not require the usage of clean data for training.
-instead, two or more independent noise realizations of each image are input during training(Noise2Noise).
-The network output was compared with that of a network trained using clean images,
-We will go through the results of works that indicate that the absence of clean images during training does not prevent the network from learning a good denoising model.
+In computed tomography (CT) imaging, image quality depends on the patient’s
+exposure during the scan. Reducing the exposure reduces patients’ health risks,
+but also reduces image quality due to higher noise in the image. A denoising
+technique preserving image features enables the acquisition of low-dose images
+without losing too much information. In this work, the performance of convolutional neural networks in denoising CT images was evaluated.
 
-In this work, an analysis of the Noise2Noise learning strategy is done using real noise and synthetic datasets.
-This paper demonstrates the effect of different factors on the ability to denoise CT images.
-These factors includes:
-- The depth of the encoder-decoder network.
-- The different loss functions available and their parameters and even suggestion of a new loss function.
-- The effect of learning rate scheduler on the network.
-- The effect of the size of each epoch without decreasing the size of the dataset.
+The peculiarity of the network is that it does not require the usage of clean
+data for training. instead, two or more independent noise realizations of each
+image are input during training(Noise2Noise).
 
-Mainly this work will look into the concept of teaching the network one
-thing in order for it to learn to do another thing, with the different materializing of the deep learning concept in this situation.
+This project demonstrates the effect of different factors on the ability to
+denoise CT images. For example: the depth of the encoder-decoder network,
+the loss function used, the learning rate scheduler, and the size of each epoch.
+
+This work looks into the concept of teaching the network one thing, and
+for it to learn to do another thing, with the different materializing of the deep
+learning concept in this situation.
+
 
 ## Code structure
 - n2n = Network package
@@ -39,6 +37,9 @@ thing in order for it to learn to do another thing, with the different materiali
 - plot_history.py = Plot the results of the network.
 - README.md
 
+## Example weights
+
+https://drive.google.com/file/d/11mJzKF9jj_J4-lUAx3s8T6KNYgttWgLL/view?usp=sharing
 
 ## Run Example
 
