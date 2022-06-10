@@ -1,6 +1,0 @@
-1.Gnudi et al. CNN Denoising without Clean Data (revised final) אור,ליעד
-2.Calvarons_Improved_Noise2Noise_Denoising_With_Limited_Data_CVPRW_2021_paper ליעד,אור
-3.Hybrid-Collaborative_Noise2Noise_Denoiser_for_Low-Dose_CT_Images אור-חצי
-4.Noise to noise אור, ליעד
-5.Fang_2021_Phys._Med._Biol._66_155013
-6.Seismic fault detection using an encoder–decoder אור
